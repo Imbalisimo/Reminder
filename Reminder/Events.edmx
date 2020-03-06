@@ -7,12 +7,13 @@
       <Schema Namespace="EventsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Events">
           <Key>
-            <PropertyRef Name="EventId" />
+            <PropertyRef Name="Id" />
           </Key>
-          <Property Name="EventId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Event_name" Type="varchar" MaxLength="500" />
-          <Property Name="Event_date" Type="date" Nullable="false" />
-          <Property Name="Every_year" Type="bit" Nullable="false" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nchar" MaxLength="150" Nullable="false" />
+          <Property Name="Date" Type="date" Nullable="false" />
+          <Property Name="Annually" Type="bit" Nullable="false" />
         </EntityType>
         <EntityContainer Name="EventsModelStoreContainer">
           <EntitySet Name="Events" EntityType="Self.Events" Schema="dbo" store:Type="Tables" />
@@ -24,12 +25,13 @@
       <Schema Namespace="EventsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityType Name="Events">
           <Key>
-            <PropertyRef Name="EventId" />
+            <PropertyRef Name="Id" />
           </Key>
-          <Property Name="EventId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Event_name" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="Event_date" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="Every_year" Type="Boolean" Nullable="false" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="true" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="150" FixedLength="true" Unicode="true" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Annually" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityContainer Name="EventsEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Events" EntityType="Self.Events" />
@@ -43,10 +45,11 @@
           <EntitySetMapping Name="Events">
             <EntityTypeMapping TypeName="EventsModel.Events">
               <MappingFragment StoreEntitySet="Events">
-                <ScalarProperty Name="EventId" ColumnName="EventId" />
-                <ScalarProperty Name="Event_name" ColumnName="Event_name" />
-                <ScalarProperty Name="Event_date" ColumnName="Event_date" />
-                <ScalarProperty Name="Every_year" ColumnName="Every_year" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="Annually" ColumnName="Annually" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

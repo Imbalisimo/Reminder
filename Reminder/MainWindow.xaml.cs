@@ -106,8 +106,8 @@ namespace Reminder
         private void PopReminderWindow(DateTime now)
         {
             var todayEvents = from Events in eventsEntities.Events
-                              where now.Day == Events.Event_date.Day &&
-                                   now.Month == Events.Event_date.Month
+                              where now.Day == Events.Date.Day &&
+                                   now.Month == Events.Date.Month
                               select Events;
 
             ReminderWindow reminder = new ReminderWindow(todayEvents.ToList(), (hoursWhenToRemind.Last() > now.Hour) && (todayEvents.ToList().Count > 0));
@@ -118,7 +118,7 @@ namespace Reminder
                     lastDateConfirmed = now;
                     lastHourWhenReminded = 25;
                     foreach (Events e in todayEvents)
-                        if (!e.Every_year)
+                        if (!e.Annually)
                             eventsEntities.Events.Remove(e);
                     eventsEntities.SaveChanges();
                     break;
@@ -133,10 +133,10 @@ namespace Reminder
         {
             DateTime now = DateTime.Now;
             var pastEvents = from Events in eventsEntities.Events
-                             where Events.Every_year == false &&
-                                   (Events.Event_date.Year < now.Year ||
-                                   (Events.Event_date.Year == now.Year && Events.Event_date.Month < now.Month) ||
-                                   (Events.Event_date.Year == now.Year && Events.Event_date.Month == now.Month && Events.Event_date.Day < now.Day))
+                             where Events.Annually == false &&
+                                   (Events.Date.Year < now.Year ||
+                                   (Events.Date.Year == now.Year && Events.Date.Month < now.Month) ||
+                                   (Events.Date.Year == now.Year && Events.Date.Month == now.Month && Events.Date.Day < now.Day))
                              select Events;
 
             //foreach (var element in pastEvents)
@@ -208,10 +208,10 @@ namespace Reminder
             }
 
             Events newEvent = new Events();
-            newEvent.Event_date = date;
-            newEvent.Event_name = new TextRange(rtb_description.Document.ContentStart,
+            newEvent.Date = date;
+            newEvent.Name = new TextRange(rtb_description.Document.ContentStart,
                 rtb_description.Document.ContentEnd).Text;
-            newEvent.Every_year = ((rb_every.IsChecked ?? false));
+            newEvent.Annually = ((rb_every.IsChecked ?? false));
 
             eventsEntities.Events.Add(newEvent);
             eventsEntities.SaveChanges();
@@ -241,15 +241,15 @@ namespace Reminder
         {
             var overlappingDates = (rb_single.IsChecked ?? false) ?
                                     from Events in eventsEntities.Events
-                                    where (date.Day == Events.Event_date.Day) &&
-                                         (date.Month == Events.Event_date.Month) &&
-                                         (date.Year == Events.Event_date.Year) &&
-                                         ((rb_single.IsChecked ?? false) == !Events.Every_year)
+                                    where (date.Day == Events.Date.Day) &&
+                                         (date.Month == Events.Date.Month) &&
+                                         (date.Year == Events.Date.Year) &&
+                                         ((rb_single.IsChecked ?? false) == !Events.Annually)
                                     select Events
                                    : from Events in eventsEntities.Events
-                                     where (date.Day == Events.Event_date.Day) &&
-                                          (date.Month == Events.Event_date.Month) &&
-                                          ((rb_every.IsChecked ?? false) == Events.Every_year)
+                                     where (date.Day == Events.Date.Day) &&
+                                          (date.Month == Events.Date.Month) &&
+                                          ((rb_every.IsChecked ?? false) == Events.Annually)
                                      select Events;
 
             return overlappingDates.ToList();
