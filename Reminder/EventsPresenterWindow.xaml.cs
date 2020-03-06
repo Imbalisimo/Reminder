@@ -20,10 +20,10 @@ namespace Reminder
     /// </summary>
     public partial class EventsPresenterWindow : Window
     {
-        public EventsPresenterWindow(EventsEntities events)
+        public EventsPresenterWindow(List<Events> events)
         {
             InitializeComponent();
-            EventsData.ItemsSource = events.Events.ToList();
+            EventsData.ItemsSource = events;
             EventsData.CanUserAddRows = false;
         }
 

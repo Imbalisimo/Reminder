@@ -15,9 +15,13 @@ namespace Reminder
     public partial class Events
     {
         public int Id { get; set; }
-        public string Name { get; set; }
         public string Description { get; set; }
         public System.DateTime Date { get; set; }
         public bool Annually { get; set; }
+
+        public override string ToString()
+        {
+            return Date.ToShortDateString() + " " + Description; 
+        }
     }
 }

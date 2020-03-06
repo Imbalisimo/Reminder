@@ -82,6 +82,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DatabaseManager.cs" />
     <Compile Include="Events.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -189,7 +190,7 @@
       <LastGenOutput>Events.Context.cs</LastGenOutput>
     </Content>
     <Content Include="Events.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Events.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -197,7 +198,7 @@
       <LastGenOutput>Events1.cs</LastGenOutput>
     </Content>
     <Content Include="Events_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DependentUpon>Events.mdf</DependentUpon>
     </Content>
     <None Include="Resources\MyIcon.ico" />

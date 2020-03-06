@@ -27,7 +27,6 @@ namespace Reminder
     /// </summary>
     public partial class MainWindow : Window
     {
-        EventsEntities eventsEntities;
         List<int> hoursWhenToRemind;
         int lastHourWhenReminded;
         DateTime lastDateConfirmed;
@@ -44,6 +43,8 @@ namespace Reminder
         public MainWindow()
         {
             InitializeComponent();
+            System.Globalization.CultureInfo cultureInfo = new System.Globalization.CultureInfo("en-GB");
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
             DateCalendar.DisplayDate = DateTime.Now;
             DateCalendar.SelectionMode = CalendarSelectionMode.SingleDate;
             rb_single.IsChecked = true;
@@ -70,8 +71,6 @@ namespace Reminder
 
         private void Initialization()
         {
-            eventsEntities = new EventsEntities();
-
             DateChanged += () => { DateCalendar.DisplayDate = DateTime.Now; };
 
             InitializeRemindingHours();
@@ -105,10 +104,7 @@ namespace Reminder
 
         private void PopReminderWindow(DateTime now)
         {
-            var todayEvents = from Events in eventsEntities.Events
-                              where now.Day == Events.Date.Day &&
-                                   now.Month == Events.Date.Month
-                              select Events;
+            var todayEvents = DatabaseManager.GetEventsForTheDay(now);
 
             ReminderWindow reminder = new ReminderWindow(todayEvents.ToList(), (hoursWhenToRemind.Last() > now.Hour) && (todayEvents.ToList().Count > 0));
             
@@ -117,10 +113,11 @@ namespace Reminder
                 case true:
                     lastDateConfirmed = now;
                     lastHourWhenReminded = 25;
+                    List<Events> eventsToDelete = new List<Events>();
                     foreach (Events e in todayEvents)
                         if (!e.Annually)
-                            eventsEntities.Events.Remove(e);
-                    eventsEntities.SaveChanges();
+                            eventsToDelete.Add(e);
+                    DatabaseManager.RemoveEvent(eventsToDelete);
                     break;
                 case false:
                 default:
@@ -132,18 +129,11 @@ namespace Reminder
         private void DeletePastEvents()
         {
             DateTime now = DateTime.Now;
-            var pastEvents = from Events in eventsEntities.Events
-                             where Events.Annually == false &&
-                                   (Events.Date.Year < now.Year ||
-                                   (Events.Date.Year == now.Year && Events.Date.Month < now.Month) ||
-                                   (Events.Date.Year == now.Year && Events.Date.Month == now.Month && Events.Date.Day < now.Day))
-                             select Events;
-
+            var pastEvents = DatabaseManager.GetEventsBeforeDate(DateTime.Now);
             //foreach (var element in pastEvents)
             //{
             //    eventsEntities.Events.Remove(element);
             //}
-            eventsEntities.SaveChanges();
         }
 
         private void InitializeRemindingHours()
@@ -203,18 +193,17 @@ namespace Reminder
                 if (overlappingDatesWindow.Result != null)
                 {
                     Events eventToDelete = overlappingDatesWindow.Result;
-                    eventsEntities.Events.Remove(eventToDelete);
+                    DatabaseManager.RemoveEvent(eventToDelete);
                 }
             }
 
             Events newEvent = new Events();
             newEvent.Date = date;
-            newEvent.Name = new TextRange(rtb_description.Document.ContentStart,
+            newEvent.Description = new TextRange(rtb_description.Document.ContentStart,
                 rtb_description.Document.ContentEnd).Text;
             newEvent.Annually = ((rb_every.IsChecked ?? false));
 
-            eventsEntities.Events.Add(newEvent);
-            eventsEntities.SaveChanges();
+            DatabaseManager.AddNewEvent(newEvent);
 
             Reset();
         }
@@ -239,18 +228,18 @@ namespace Reminder
 
         private List<Events> GetOverlappingDates(DateTime date)
         {
-            var overlappingDates = (rb_single.IsChecked ?? false) ?
-                                    from Events in eventsEntities.Events
-                                    where (date.Day == Events.Date.Day) &&
-                                         (date.Month == Events.Date.Month) &&
-                                         (date.Year == Events.Date.Year) &&
-                                         ((rb_single.IsChecked ?? false) == !Events.Annually)
-                                    select Events
-                                   : from Events in eventsEntities.Events
-                                     where (date.Day == Events.Date.Day) &&
-                                          (date.Month == Events.Date.Month) &&
-                                          ((rb_every.IsChecked ?? false) == Events.Annually)
-                                     select Events;
+            var overlappingDates = DatabaseManager.GetOverlappingDates(date, !(rb_single.IsChecked ?? false));
+                                   // from Events in eventsEntities.Events
+                                   // where (date.Day == Events.Date.Day) &&
+                                   //      (date.Month == Events.Date.Month) &&
+                                   //      (date.Year == Events.Date.Year) &&
+                                   //      ((rb_single.IsChecked ?? false) == !Events.Annually)
+                                   // select Events
+                                   //: from Events in eventsEntities.Events
+                                   //  where (date.Day == Events.Date.Day) &&
+                                   //       (date.Month == Events.Date.Month) &&
+                                   //       ((rb_every.IsChecked ?? false) == Events.Annually)
+                                   //  select Events;
 
             return overlappingDates.ToList();
         }
@@ -286,8 +275,7 @@ namespace Reminder
                 {
                     List<Events> eventsToDelete = removingDatesWindow.Result;
                     foreach (Events theEvent in eventsToDelete)
-                        eventsEntities.Events.Remove(theEvent);
-                    eventsEntities.SaveChanges();
+                        DatabaseManager.RemoveEvent(theEvent);
                     Reset();
                 }
             }
@@ -324,9 +312,8 @@ namespace Reminder
 
         private void AllEventsMenu_Click(object sender, RoutedEventArgs e)
         {
-            EventsPresenterWindow presenterWindow = new EventsPresenterWindow(eventsEntities);
+            EventsPresenterWindow presenterWindow = new EventsPresenterWindow(DatabaseManager.GetAllEvents());
             presenterWindow.ShowDialog();
-            eventsEntities.SaveChanges();
         }
 
         private void CreateContextMenu()
